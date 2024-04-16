@@ -40,6 +40,8 @@ steamless_folder_path = None
 goldberg_folder_path = None
 
 def check_required_folder():
+    '''Checks  if the required folders are present. Downloads them if not found'''
+
     global steamless_folder_path, goldberg_folder_path
     try:
         # Gets the directory of the current script
@@ -66,6 +68,7 @@ def check_required_folder():
 
 
 def browse_file():
+    '''Opens a file dialog to select a game file. Extracts the folder path and game name.'''
     global folder_path, game_name, game_file_path
     game_file_path = filedialog.askopenfilename(
         filetypes=[("Executable files", "*.exe")])
@@ -83,6 +86,8 @@ def browse_file():
 
 
 def decrypt():
+    """Searches pcgamingwikifor info, unpacks() if needed, and emulates()."""
+
     global game_name
     if not game_name:
         log_area.insert(tk.END, "Please select a folder first.\n")
@@ -91,19 +96,66 @@ def decrypt():
     log_area.insert(tk.END, f"Analyzing {game_name}...\n")
     drm_analysis = DRMAnalysis(game_name)
     availability_section, denuvo_detected = drm_analysis.get_pcgamingwiki_info()
-
     if denuvo_detected:
         log_area.insert(tk.END, "Denuvo Anti-Tamper detected.\n")
     elif availability_section:
         analysis_result = drm_analysis.analyze_steam_availability(
             availability_section)
+        # Run Steamless if game doesn't use DRM
+        if "Doesn't use DRM" not in analysis_result:
+            log_area.insert(tk.END, f"Unpacking {game_name}...\n")
+            if steamless_folder_path:
+                unpacked_file_path = SteamDRMStripper.unpack_with_steamless(
+                    game_file_path, steamless_folder_path)
+            else:
+                log_area.insert(
+                    tk.END, "Steamless folder not found. Unable to unpack.\n")
+
+        # Emulate game NEED TO LOOK AT
+        if unpacked_file_path:
+            emulate(unpacked_file_path)
+        else:
+            emulate(game_file_path)
         log_area.insert(tk.END, analysis_result)
+        print(steamless_folder_path)
+        print(goldberg_folder_path)
+        print(game_file_path)
+        print(game_name)
+        log_area.insert(tk.END, "DONE")
+
     else:
         log_area.insert(
             tk.END, "Availability section not found or failed to retrieve data.\n")
 
     log_area.yview(tk.END)
+def emulate(game_exe_path):
+    log_area.insert(tk.END, f"Analyzing bit version of {game_name}...\n")
+    gb_analysis = GB_Modification(folder_path, game_name)
+    dll_path = gb_analysis.find_game_dll()
 
+    if dll_path is not None:
+        dll_basename = os.path.basename(dll_path)
+
+        if dll_basename == "steam_api64.dll":
+            log_area.insert(tk.END, "64-bit application\n")
+            log_area.insert(tk.END, f"{dll_basename} found at {dll_path}\n")
+            log_area.insert(tk.END, f"Preparing to emulate {game_name}...\n")
+            gb_analysis.modify_files(
+                goldberg_folder_path, dll_path, game_exe_path)
+            time.sleep(1)
+            SteamDRMStripper.run_unpacked_file(game_exe_path)
+        elif dll_basename == "steam_api.dll":
+            log_area.insert(tk.END, "32-bit application\n")
+            log_area.insert(tk.END, f"{dll_basename} found at {dll_path}\n")
+            log_area.insert(tk.END, f"Preparing to emulate {game_name}...\n")
+            gb_analysis.modify_files(
+                goldberg_folder_path, dll_path, game_exe_path)
+            time.sleep(1)
+            SteamDRMStripper.run_unpacked_file(game_exe_path)
+    else:
+        log_area.insert(tk.END, "DLL file not found.\n")
+        print("DLL file not found.")
+    log_area.yview(tk.END)
 #Unpack and run the unpacked file if applicable
 def unpack():
     global game_name, steamless_folder_path, game_file_path
@@ -117,26 +169,6 @@ def unpack():
         log_area.insert(tk.END, "Steamless folder not found. Unable to unpack.\n")
     log_area.yview(tk.END)
 
-def emulate():
-    log_area.insert(tk.END, f"Analyzing bit version of {game_name}...\n")
-    gb_analysis = GB_Modification(folder_path, game_name)
-    bit_version = gb_analysis.detect_bit_version()
-
-    if bit_version["windows_64"] == True or bit_version["windows_32"]==True:
-        log_area.insert(tk.END, f"Bit version: {bit_version}\n")
-        log_area.insert(tk.END, f"Preparing to emulate {game_name}...\n")
-        dll_dir = gb_analysis.find_game_dll()
-        if dll_dir:
-            log_area.insert(tk.END, "Game dll found.\n")
-            log_area.insert(tk.END, "Modifying dll file.\n")
-            modify_files = gb_analysis.modify_files(goldberg_folder_path, bit_version)
-            #RUN UNPACKED FILE HERE
-        else:
-            log_area.insert(tk.END, "Game dll not found.\n")
-    else:
-        log_area.insert(
-            tk.END, "Bit version unknown, or game is incompatible.\n")
-    log_area.yview(tk.END)
 
 text_font = (FONT_STYLE, 10)
 app = tk.Tk()
@@ -173,7 +205,8 @@ app.grid_rowconfigure(0, weight=1)
 app.grid_columnconfigure(0, weight=1)
 
 
-# Check required folders in a separate thread
+# Change at the end of script, before mainloop
+
 thread = threading.Thread(target=check_required_folder)
 thread.start()
 
