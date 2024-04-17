@@ -1,14 +1,13 @@
 import tkinter as tk
-from tkinter import filedialog, scrolledtext, font
+from tkinter import filedialog, scrolledtext,font
+from drm_analysis import DRMAnalysis
 import os
 import sys
 import io
-import threading
 import time
 import threading
 import SteamDRMStripper
 import download_required
-from drm_analysis import DRMAnalysis
 from goldberg_emulator_implementation import GB_Modification
 
 BACKGROUND_COLOR = "#121212"
@@ -39,30 +38,37 @@ game_file_path = None
 steamless_folder_path = None
 goldberg_folder_path = None
 
+
 def check_required_folder():
-    '''Checks  if the required folders are present. Downloads them if not found'''
+    '''Checks if the required folders are present. Downloads them if not found.'''
 
     global steamless_folder_path, goldberg_folder_path
     try:
         # Gets the directory of the current script
         exe_path = os.path.dirname(os.path.abspath(__file__))
 
-        #Check for Steamless folder
-        steamless_folder_path = os.path.join(exe_path, "Steamless.v3.1.0.3.-.by.atom0s")
+        # Check for Steamless folder
+        steamless_folder_path = os.path.join(
+            exe_path, "Steamless.v3.1.0.3.-.by.atom0s")
         if not os.path.exists(steamless_folder_path):
-            log_area.insert(tk.END, "Steamless folder not found. Downloading Steamless...\n")
+            log_area.insert(
+                tk.END, "Steamless folder not found. Downloading Steamless...\n")
             # Assuming download_required.py is in the same directory as this script
             download_required.download_steamless()
         else:
-            log_area.insert(tk.END, "Steamless folder found. Skipping Steamless download...\n")
+            log_area.insert(
+                tk.END, "Steamless folder found. Skipping Steamless download...\n")
 
-        #Check for Goldberg folder
-        goldberg_folder_path = os.path.join(exe_path, "Goldberg_Lan_Steam_Emu_v0.2.5")
+        # Check for Goldberg folder
+        goldberg_folder_path = os.path.join(
+            exe_path, "Goldberg_Lan_Steam_Emu_v0.2.5")
         if not os.path.exists(goldberg_folder_path):
-            log_area.insert(tk.END, "Goldberg folder not found. Downloading Goldberg Emulator...\n")
+            log_area.insert(
+                tk.END, "Goldberg folder not found. Downloading Goldberg Emulator...\n")
             download_required.download_goldberg()
         else:
-            log_area.insert(tk.END, "Goldberg folder found. Skipping Goldberg Emulator download...\n")
+            log_area.insert(
+                tk.END, "Goldberg folder found. Skipping Goldberg Emulator download...\n")
     except Exception as e:
         log_area.insert(tk.END, f"Error: {e}\n")
 
@@ -80,7 +86,7 @@ def browse_file():
         print("game_name:", game_name)
         path_label.config(text=folder_path)
     else:
-        path_label.config(text="Please Select A File")
+        path_label.config(text="No file selected")
         folder_path = None
         game_name = None
 
@@ -94,13 +100,14 @@ def decrypt():
         return
 
     log_area.insert(tk.END, f"Analyzing {game_name}...\n")
-    drm_analysis = DRMAnalysis(game_name)
+    drm_analysis = DRMAnalysis(game_name)  # need to look at
     availability_section, denuvo_detected = drm_analysis.get_pcgamingwiki_info()
     if denuvo_detected:
         log_area.insert(tk.END, "Denuvo Anti-Tamper detected.\n")
     elif availability_section:
         analysis_result = drm_analysis.analyze_steam_availability(
             availability_section)
+
         # Run Steamless if game doesn't use DRM
         if "Doesn't use DRM" not in analysis_result:
             log_area.insert(tk.END, f"Unpacking {game_name}...\n")
@@ -128,6 +135,8 @@ def decrypt():
             tk.END, "Availability section not found or failed to retrieve data.\n")
 
     log_area.yview(tk.END)
+
+
 def emulate(game_exe_path):
     log_area.insert(tk.END, f"Analyzing bit version of {game_name}...\n")
     gb_analysis = GB_Modification(folder_path, game_name)
@@ -156,7 +165,9 @@ def emulate(game_exe_path):
         log_area.insert(tk.END, "DLL file not found.\n")
         print("DLL file not found.")
     log_area.yview(tk.END)
-#Unpack and run the unpacked file if applicable
+
+
+'''  TESTING
 def unpack():
     global game_name, steamless_folder_path, game_file_path
     if not game_name:
@@ -164,10 +175,13 @@ def unpack():
         return
     log_area.insert(tk.END, f"Unpacking {game_name}...\n")
     if steamless_folder_path:
-        SteamDRMStripper.unpack_with_steamless(game_file_path, steamless_folder_path)
+        unpacked_file_path = SteamDRMStripper.unpack_with_steamless(
+            game_file_path, steamless_folder_path)
     else:
-        log_area.insert(tk.END, "Steamless folder not found. Unable to unpack.\n")
+        log_area.insert(
+            tk.END, "Steamless folder not found. Unable to unpack.\n")
     log_area.yview(tk.END)
+'''
 
 
 text_font = (FONT_STYLE, 10)
@@ -192,11 +206,12 @@ browse_button.grid(row=0, column=0, padx=30)
 decrypt_button = tk.Button(button_frame, text="Decrypt", command=decrypt, bg=BUTTON_COLOR, fg=TEXT_COLOR, activebackground=ACTIVE_BUTTON_COLOR, activeforeground=TEXT_COLOR, font=text_font)
 decrypt_button.grid(row=0, column=1, padx=30)
 
-unpack_button = tk.Button(button_frame, text="Unpack", command=unpack, bg=BUTTON_COLOR, fg=TEXT_COLOR, activebackground=ACTIVE_BUTTON_COLOR, activeforeground=TEXT_COLOR, font=text_font)
-unpack_button.grid(row=0, column=2, padx=30)
+# Testing
+# unpack_button = tk.Button(button_frame, text="Unpack", command=unpack)
+# unpack_button.grid(row=0, column=2, padx=5)
 
-goldberg_button = tk.Button(button_frame, text="Emulate", command=emulate, bg=BUTTON_COLOR, fg=TEXT_COLOR, activebackground=ACTIVE_BUTTON_COLOR, activeforeground=TEXT_COLOR, font=text_font)
-goldberg_button.grid(row=0, column=3, padx=30)
+# goldberg_button = tk.Button(button_frame, text="Emulate", command=emulate)
+# goldberg_button.grid(row=0, column=3, padx=5)
 
 log_stream = PrintLogger(log_area)
 sys.stdout = log_stream
