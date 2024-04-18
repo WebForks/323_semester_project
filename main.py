@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, scrolledtext
+from tkinter import filedialog, scrolledtext,font
 from drm_analysis import DRMAnalysis
 import os
 import sys
@@ -10,6 +10,16 @@ import SteamDRMStripper
 import download_required
 from goldberg_emulator_implementation import GB_Modification
 
+BACKGROUND_COLOR = "#121212"
+TEXT_COLOR = "#FFFFFF"
+BUTTON_COLOR = "#32CD32"
+ACTIVE_BUTTON_COLOR = "#4DFFB8"
+FONT_STYLE = "Terminus"
+
+def create_title_label(parent):
+    title_font = font.Font(family=FONT_STYLE, size=20)  # Increased font size
+    title_label = tk.Label(parent, text="👾 PLAY GAMES FOR FREE! 👾", bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=title_font)  # Changed text
+    title_label.grid(row=0, column=0, columnspan=4, sticky='nsew', padx=10, pady=10)
 
 class PrintLogger(io.StringIO):
     def __init__(self, log_area):
@@ -173,24 +183,28 @@ def unpack():
     log_area.yview(tk.END)
 '''
 
+
+text_font = (FONT_STYLE, 10)
 app = tk.Tk()
 app.title('Game Folder Selector')
+app.configure(bg=BACKGROUND_COLOR)
 
-log_area = scrolledtext.ScrolledText(app, width=40, height=10, state='normal')
-log_area.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
+create_title_label(app)
 
-path_label = tk.Label(app, text="No folder selected")
-path_label.grid(row=1, column=0, sticky='nsew', padx=5, pady=5)
+log_area = scrolledtext.ScrolledText(app, width=60, height=15, state='normal', bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=text_font)
+log_area.grid(row=1, column=0, columnspan=4, sticky='nsew', padx=10, pady=10)
 
-button_frame = tk.Frame(app)
-button_frame.grid(row=2, column=0, sticky='ew', padx=5, pady=5)
+path_label = tk.Label(app, text="Please Select A Folder", bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=text_font)
+path_label.grid(row=2, column=0, columnspan=4, sticky='nsew', padx=10, pady=5)
 
-browse_button = tk.Button(button_frame, text="Browse", command=browse_file)
-browse_button.grid(row=0, column=0, padx=5)
+button_frame = tk.Frame(app, bg=BACKGROUND_COLOR)
+button_frame.grid(row=3, column=0, columnspan=4, sticky='ew', padx=10, pady=5)
 
-decrypt_button = tk.Button(button_frame, text="Decrypt", command=decrypt)
-decrypt_button.grid(row=0, column=1, padx=5)
+browse_button = tk.Button(button_frame, text="Browse", command=browse_file, bg=BUTTON_COLOR, fg=TEXT_COLOR, activebackground=ACTIVE_BUTTON_COLOR, activeforeground=TEXT_COLOR, font=text_font)
+browse_button.grid(row=0, column=0, padx=30)
 
+decrypt_button = tk.Button(button_frame, text="Decrypt", command=decrypt, bg=BUTTON_COLOR, fg=TEXT_COLOR, activebackground=ACTIVE_BUTTON_COLOR, activeforeground=TEXT_COLOR, font=text_font)
+decrypt_button.grid(row=0, column=1, padx=30)
 
 # Testing
 # unpack_button = tk.Button(button_frame, text="Unpack", command=unpack)
@@ -205,7 +219,9 @@ sys.stdout = log_stream
 app.grid_rowconfigure(0, weight=1)
 app.grid_columnconfigure(0, weight=1)
 
-# Change at the end of your script, before mainloop
+
+# Change at the end of script, before mainloop
+
 thread = threading.Thread(target=check_required_folder)
 thread.start()
 
