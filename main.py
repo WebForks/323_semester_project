@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, scrolledtext,font
+from tkinter import filedialog, scrolledtext, font
 from drm_analysis import DRMAnalysis
 import os
 import sys
@@ -16,10 +16,14 @@ BUTTON_COLOR = "#32CD32"
 ACTIVE_BUTTON_COLOR = "#4DFFB8"
 FONT_STYLE = "Terminus"
 
+
 def create_title_label(parent):
     title_font = font.Font(family=FONT_STYLE, size=20)  # Increased font size
-    title_label = tk.Label(parent, text="👾 PLAY GAMES FOR FREE! 👾", bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=title_font)  # Changed text
-    title_label.grid(row=0, column=0, columnspan=4, sticky='nsew', padx=10, pady=10)
+    title_label = tk.Label(parent, text="👾 378 Semester Project 👾",
+                           bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=title_font)  # Changed text
+    title_label.grid(row=0, column=0, columnspan=4,
+                     sticky='nsew', padx=10, pady=10)
+
 
 class PrintLogger(io.StringIO):
     def __init__(self, log_area):
@@ -191,19 +195,23 @@ app.configure(bg=BACKGROUND_COLOR)
 
 create_title_label(app)
 
-log_area = scrolledtext.ScrolledText(app, width=60, height=15, state='normal', bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=text_font)
+log_area = scrolledtext.ScrolledText(
+    app, width=60, height=15, state='normal', bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=text_font)
 log_area.grid(row=1, column=0, columnspan=4, sticky='nsew', padx=10, pady=10)
 
-path_label = tk.Label(app, text="Please Select A Folder", bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=text_font)
+path_label = tk.Label(app, text="Please Select A Folder",
+                      bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=text_font)
 path_label.grid(row=2, column=0, columnspan=4, sticky='nsew', padx=10, pady=5)
 
 button_frame = tk.Frame(app, bg=BACKGROUND_COLOR)
 button_frame.grid(row=3, column=0, columnspan=4, sticky='ew', padx=10, pady=5)
 
-browse_button = tk.Button(button_frame, text="Browse", command=browse_file, bg=BUTTON_COLOR, fg=TEXT_COLOR, activebackground=ACTIVE_BUTTON_COLOR, activeforeground=TEXT_COLOR, font=text_font)
+browse_button = tk.Button(button_frame, text="Browse", command=browse_file, bg=BUTTON_COLOR,
+                          fg=TEXT_COLOR, activebackground=ACTIVE_BUTTON_COLOR, activeforeground=TEXT_COLOR, font=text_font)
 browse_button.grid(row=0, column=0, padx=30)
 
-decrypt_button = tk.Button(button_frame, text="Decrypt", command=decrypt, bg=BUTTON_COLOR, fg=TEXT_COLOR, activebackground=ACTIVE_BUTTON_COLOR, activeforeground=TEXT_COLOR, font=text_font)
+decrypt_button = tk.Button(button_frame, text="Decrypt", command=decrypt, bg=BUTTON_COLOR,
+                           fg=TEXT_COLOR, activebackground=ACTIVE_BUTTON_COLOR, activeforeground=TEXT_COLOR, font=text_font)
 decrypt_button.grid(row=0, column=1, padx=30)
 
 # Testing
