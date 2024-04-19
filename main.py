@@ -22,7 +22,7 @@ def create_title_label(parent):
     title_label = tk.Label(parent, text="👾 378 Semester Project 👾",
                            bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=title_font)  # Changed text
     title_label.grid(row=0, column=0, columnspan=4,
-                     sticky='nsew', padx=10, pady=10)
+                     sticky='nsew', padx=10, pady=3)
 
 
 class PrintLogger(io.StringIO):
@@ -196,7 +196,7 @@ app.configure(bg=BACKGROUND_COLOR)
 create_title_label(app)
 
 log_area = scrolledtext.ScrolledText(
-    app, width=60, height=15, state='normal', bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=text_font)
+    app, width=60, height=40, state='normal', bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=text_font)
 log_area.grid(row=1, column=0, columnspan=4, sticky='nsew', padx=10, pady=10)
 
 path_label = tk.Label(app, text="Please Select A Folder",
